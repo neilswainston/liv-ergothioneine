@@ -11,7 +11,7 @@ import sys
 from cobra.io import read_sbml_model, write_sbml_model
 
 from liv.ergothioneine.build import build
-from liv.ergothioneine.utils import add_creator, makedirs, save
+from liv.ergothioneine.utils import add_creator, get_flux_df, makedirs
 import numpy as np
 
 
@@ -33,8 +33,11 @@ def simulate(model, out_dir):
         print('%.1f' % prop, ['%.3f' % val
                               for val in solution.fluxes[reacts].values])
 
-        save(model, solution, os.path.join(out_dir, '%.1f.csv' % prop))
-        # print(model.summary(names=True))
+        # Format and save flux solution:
+        filename = os.path.join(out_dir, '%.1f.csv' % prop)
+        df = get_flux_df(model, solution)
+        makedirs(filename)
+        df.to_csv(filename)
 
 
 def _simulate(model):

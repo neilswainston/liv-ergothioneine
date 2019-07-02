@@ -50,9 +50,8 @@ def add_reaction(model, reaction_id, name, reac_str,
     return reaction
 
 
-def save(model, solution, filename):
-    '''Save solution.'''
-    makedirs(filename)
+def get_flux_df(model, solution):
+    '''Get flux DataFrame.'''
     df = solution.to_frame()
 
     # Remove zero fluxes and sort:
@@ -64,7 +63,7 @@ def save(model, solution, filename):
     response = df['index'].apply(partial(_get_react_details, model))
     df[['reaction_name', 'reaction_def']] = response
 
-    df.to_csv(filename)
+    return df
 
 
 def makedirs(filename):
