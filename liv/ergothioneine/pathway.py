@@ -9,8 +9,9 @@ All rights reserved.
 import os.path
 import sys
 
-from cobra import Metabolite, Reaction
 from cobra.io import read_sbml_model, write_sbml_model
+
+from liv.ergothioneine.utils import add_met, add_reaction, add_creator
 
 
 def update_model(model):
@@ -54,43 +55,6 @@ def update_model(model):
                  reac_str)
 
     return model
-
-
-def add_creator(model, family_name, given_name, organisation, email):
-    '''Add creator.'''
-    model._sbml['creators'] = [{'familyName': family_name,
-                                'givenName': given_name,
-                                'organisation': organisation,
-                                'email': email}]
-
-
-def add_met(model, met_id, name, formula, compartment):
-    '''Add metabolite.'''
-    met = Metabolite(met_id, formula=formula,
-                     name=name, compartment=compartment)
-
-    return model.add_metabolites([met])
-
-
-def add_reaction(model, reaction_id, name, reac_str,
-                 gene_reaction_rule=None, subsystem=None):
-    '''Add reaction.'''
-    reaction = Reaction(reaction_id)
-    model.add_reaction(reaction)
-    reaction.name = name
-    reaction.build_reaction_from_string(reac_str)
-
-    if gene_reaction_rule:
-        reaction.gene_reaction_rule = gene_reaction_rule
-
-    reaction.subsystem = subsystem
-
-    balance = reaction.check_mass_balance()
-
-    if balance:
-        raise ValueError(balance)
-
-    return reaction
 
 
 def main(args):
