@@ -17,14 +17,21 @@ import numpy as np
 
 def simulate(model):
     '''Simulate model.'''
+    # Biomass:
+    biomass_max = _simulate(model).objective_value
+    biomass_react = model.reactions.get_by_id('r_2111')
 
     reacts = ['r_2111', 'ergothioneine_sink']
 
-    for prop in np.arange(0, 1.1, 0.1):
-        model.objective = {model.reactions.get_by_id(react): coeff
-                           for react, coeff in zip(reacts, [prop, 1 - prop])}
+    for prop in np.arange(1.0, -0.1, -0.1):
+        biomass_flux = biomass_max * prop
+        biomass_react.lower_bound = biomass_flux
+        biomass_react.upper_bound = biomass_flux
+
+        model.objective = 'ergothioneine_sink'
         solution = _simulate(model)
-        print('%.1f' % prop, solution.fluxes[reacts].values)
+        print('%.1f' % prop, ['%.3f' % val
+                              for val in solution.fluxes[reacts].values])
 
 
 def _simulate(model):
