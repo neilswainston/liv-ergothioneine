@@ -5,17 +5,11 @@ All rights reserved.
 
 @author: neilswainston
 '''
-# pylint: disable=invalid-name
-import os.path
-import sys
-
-from cobra.io import read_sbml_model, write_sbml_model
-
-from liv.ergothioneine.utils import add_met, add_reaction, add_creator
+from liv.ergothioneine.utils import add_met, add_reaction
 
 
-def update_model(model):
-    '''Get model.'''
+def build(model):
+    '''Build model.'''
     add_met(model, 'hercynine_c', 'hercynine', 'C9H15N3O2', 'c')
     add_met(model, 'herncystsulfox_c', 'hercynylcysteine sulfoxide',
             'C12H20N4O5S', 'c')
@@ -54,20 +48,11 @@ def update_model(model):
     add_reaction(model, 'ergothioneine_synthesis', 'ergothioneine synthesis',
                  reac_str)
 
+    # ergothioneine ->
+    reac_str = '''
+        ergothioneine_c -->
+        '''
+    add_reaction(model, 'ergothioneine_sink', 'ergothioneine sink',
+                 reac_str, check=False)
+
     return model
-
-
-def main(args):
-    '''main method.'''
-    model_in = read_sbml_model(args[0])
-    model_out = update_model(model_in)
-    add_creator(model_out, *args[2:6])
-
-    if not os.path.exists(os.path.dirname(args[1])):
-        os.makedirs(os.path.dirname(args[1]))
-
-    write_sbml_model(model_out, args[1])
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

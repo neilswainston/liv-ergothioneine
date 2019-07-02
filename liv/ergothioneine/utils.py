@@ -25,7 +25,7 @@ def add_met(model, met_id, name, formula, compartment):
 
 
 def add_reaction(model, reaction_id, name, reac_str,
-                 gene_reaction_rule=None, subsystem=None):
+                 gene_reaction_rule=None, subsystem=None, check=True):
     '''Add reaction.'''
     reaction = Reaction(reaction_id)
     model.add_reaction(reaction)
@@ -37,9 +37,9 @@ def add_reaction(model, reaction_id, name, reac_str,
 
     reaction.subsystem = subsystem
 
-    balance = reaction.check_mass_balance()
+    balance_error = reaction.check_mass_balance()
 
-    if balance:
-        raise ValueError(balance)
+    if check and balance_error:
+        raise ValueError(balance_error)
 
     return reaction
