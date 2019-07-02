@@ -5,6 +5,8 @@ All rights reserved.
 
 @author: neilswainston
 '''
+import os.path
+
 from cobra import Metabolite, Reaction
 
 
@@ -43,3 +45,31 @@ def add_reaction(model, reaction_id, name, reac_str,
         raise ValueError(balance_error)
 
     return reaction
+
+
+def save(model, solution, filename):
+    '''Save solution.'''
+    makedirs(filename)
+    df = solution.to_frame()
+
+    # Remove zero fluxes and sort:
+    df = df[df['fluxes'].abs() > 1e-12]
+    df.sort_values('fluxes', ascending=False, inplace=True)
+
+    # Produce user-friendly output:
+    reactions = [model.reactions.get_by_id(react_id) for react_id in df.index]
+
+    df['reaction_name'] = [reaction.name for reaction in reactions]
+    df['reaction_def'] = \
+        [reaction.build_reaction_string(use_metabolite_names=True)
+         for reaction in reactions]
+
+    df.to_csv(filename)
+
+
+def makedirs(filename):
+    '''Make directories.'''
+    dir_name = os.path.dirname(filename)
+
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
