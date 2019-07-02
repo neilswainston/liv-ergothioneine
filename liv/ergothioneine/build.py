@@ -39,11 +39,11 @@ def build(model):
         '''
     add_reaction(model, 'Egt2', 'Egt2', reac_str, 'Egt2')
 
-    # 2-sulfenohercynine + electron donor (NADH) + H+ ->
-    # ergothioneine + electron_acceptor (NAD) + H20
+    # 2-sulfenohercynine + electron donor (glutathione) ->
+    # ergothioneine + electron_acceptor (glutathione disulfide) + H20
     reac_str = '''
-        sulfhercyn_c + s_1203__91__c__93__ + s_0794__91__c__93__ -->
-        ergothioneine_c + s_1198__91__c__93__ + s_0803__91__c__93__
+        sulfhercyn_c + 2 s_0750__91__c__93__ -->
+        ergothioneine_c + s_0754__91__c__93__ + s_0803__91__c__93__
         '''
     add_reaction(model, 'ergothioneine_synthesis', 'ergothioneine synthesis',
                  reac_str)

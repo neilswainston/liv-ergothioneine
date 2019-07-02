@@ -5,9 +5,12 @@ All rights reserved.
 
 @author: neilswainston
 '''
+from functools import partial
 import os.path
 
 from cobra import Metabolite, Reaction
+
+import pandas as pd
 
 
 def add_creator(model, family_name, given_name, organisation, email):
@@ -57,12 +60,9 @@ def save(model, solution, filename):
     df.sort_values('fluxes', ascending=False, inplace=True)
 
     # Produce user-friendly output:
-    reactions = [model.reactions.get_by_id(react_id) for react_id in df.index]
-
-    df['reaction_name'] = [reaction.name for reaction in reactions]
-    df['reaction_def'] = \
-        [reaction.build_reaction_string(use_metabolite_names=True)
-         for reaction in reactions]
+    df.reset_index(level=0, inplace=True)
+    response = df['index'].apply(partial(_get_react_details, model))
+    df[['reaction_name', 'reaction_def']] = response
 
     df.to_csv(filename)
 
@@ -73,3 +73,10 @@ def makedirs(filename):
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
+
+
+def _get_react_details(model, row):
+    '''Get reaction details.'''
+    react = model.reactions.get_by_id(row)
+    return pd.Series([react.name,
+                      react.build_reaction_string(use_metabolite_names=True)])
