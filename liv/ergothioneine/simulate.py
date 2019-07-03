@@ -11,7 +11,7 @@ import sys
 from cobra.io import read_sbml_model, write_sbml_model
 
 from liv.ergothioneine.build import build
-from liv.ergothioneine.utils import add_creator, get_flux_df, makedirs
+from liv.model.utils import add_creator, get_flux_df, makedirs
 import numpy as np
 
 
@@ -21,6 +21,7 @@ def simulate(model, out_dir):
     biomass_max = _simulate(model).objective_value
     biomass_react = model.reactions.get_by_id('r_2111')
 
+    # Biomass, ergothioneine, L-histidine, L-cysteine:
     reacts = ['r_2111', 'ergothioneine_sink', 'r_1893', 'r_1883']
 
     for prop in np.arange(1.0, -0.1, -0.1):
@@ -49,18 +50,18 @@ def _simulate(model):
 
 def main(args):
     '''main method.'''
-    model_in = read_sbml_model(args[0])
+    model = read_sbml_model(args[0])
 
     # Create updated model:
-    model_out = build(model_in)
-    add_creator(model_out, *args[3:7])
+    build(model)
+    add_creator(model, *args[3:7])
 
     # Write updated model:
     makedirs(args[1])
-    write_sbml_model(model_out, args[1])
+    write_sbml_model(model, args[1])
 
     # Simulate updated model:
-    simulate(model_out, args[2])
+    simulate(model, args[2])
 
 
 if __name__ == '__main__':

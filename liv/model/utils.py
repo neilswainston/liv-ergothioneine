@@ -54,14 +54,17 @@ def get_flux_df(model, solution):
     '''Get flux DataFrame.'''
     df = solution.to_frame()
 
-    # Remove zero fluxes and sort:
+    # Remove zero fluxes:
     df = df[df['fluxes'].abs() > 1e-12]
-    df.sort_values('fluxes', ascending=False, inplace=True)
 
     # Produce user-friendly output:
     df.reset_index(level=0, inplace=True)
-    response = df['index'].apply(partial(_get_react_details, model))
-    df[['reaction_name', 'reaction_def']] = response
+    response = df.apply(partial(_get_react_details, model), axis=1)
+    df[['reaction_name', 'reaction_def', 'fluxes']] = response
+    df.set_index('index', inplace=True)
+
+    # Sort:
+    df.sort_values('fluxes', ascending=False, inplace=True)
 
     return df
 
@@ -76,6 +79,28 @@ def makedirs(filename):
 
 def _get_react_details(model, row):
     '''Get reaction details.'''
-    react = model.reactions.get_by_id(row)
+    react = model.reactions.get_by_id(row['index'])
+
+    if row['fluxes'] < 0:
+        react = _reverse_react(react)
+
     return pd.Series([react.name,
-                      react.build_reaction_string(use_metabolite_names=True)])
+                      react.build_reaction_string(use_metabolite_names=True),
+                      abs(row['fluxes'])])
+
+
+def _reverse_react(react):
+    '''Reverse reaction.'''
+    rev_react = Reaction()
+    rev_react.name = react.name + ' (rev)'
+    rev_react.lower_bound = -react.upper_bound
+    rev_react.upper_bound = -react.lower_bound
+
+    coeffs = {met: -react.get_coefficient(met.id)
+              for met in react.reactants}
+    coeffs.update({met: -react.get_coefficient(met.id)
+                   for met in react.products})
+
+    rev_react.add_metabolites(coeffs)
+
+    return rev_react

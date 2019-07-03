@@ -5,11 +5,23 @@ All rights reserved.
 
 @author: neilswainston
 '''
-from liv.ergothioneine.utils import add_met, add_reaction
+from liv.model.utils import add_met, add_reaction
 
 
 def build(model):
     '''Build model.'''
+
+    # Add ergothioneine pathway:
+    _add_pathway(model)
+
+    # Add transport / media:
+    _add_transport(model)
+
+    return model
+
+
+def _add_pathway(model):
+    '''Add ergothioneine pathway.'''
     add_met(model, 'hercynine_c', 'hercynine', 'C9H15N3O2', 'c')
     add_met(model, 'herncystsulfox_c', 'hercynylcysteine sulfoxide',
             'C12H20N4O5S', 'c')
@@ -55,4 +67,14 @@ def build(model):
     add_reaction(model, 'ergothioneine_sink', 'ergothioneine sink',
                  reac_str, check=False)
 
-    return model
+
+def _add_transport(model):
+    '''Add transport bounds.'''
+
+    # L-histidine transport:
+    model.reactions.get_by_id('r_1893').lower_bound = -1
+    model.reactions.get_by_id('r_1201').lower_bound = 0
+
+    # L-cysteine transport:
+    model.reactions.get_by_id('r_1883').lower_bound = -1
+    model.reactions.get_by_id('r_1192').lower_bound = 0
