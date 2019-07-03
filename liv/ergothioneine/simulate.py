@@ -32,7 +32,7 @@ def simulate(model, out_dir):
 
     react_fluxes = []
 
-    for prop in np.arange(1.0, -0.1, -0.1):
+    for prop in np.arange(0.0, 1.1, 0.1):
         biomass_flux = biomass_max * prop
         biomass_react.lower_bound = biomass_flux
         biomass_react.upper_bound = biomass_flux
@@ -53,9 +53,8 @@ def simulate(model, out_dir):
     react_flux_df = pd.DataFrame(react_fluxes,
                                  columns=[index_name] + react_names)
 
+    react_flux_df.where(react_flux_df.abs() > 1e-12, 0, inplace=True)
     react_flux_df.set_index(index_name, inplace=True)
-    react_flux_df = react_flux_df.abs()
-    react_flux_df = react_flux_df.where(react_flux_df > 1e-12).fillna(0)
     react_flux_df.name = 'react_fluxes'
 
     return react_flux_df
