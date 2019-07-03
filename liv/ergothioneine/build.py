@@ -70,12 +70,35 @@ def _add_pathway(model):
 
 def _add_transport(model):
     '''Add transport bounds.'''
+    duration = 84  # hr
+
+    # Glucose transport:
+    # 175g / 180.2 g/mol / 84h * 1000 = mmol/h
+    glucose_mass = 180.2
+    glucose_uptake_min = (175 - 3.5) / glucose_mass / duration * 1000
+    glucose_uptake_max = (175 + 3.5) / glucose_mass / duration * 1000
+    model.reactions.get_by_id('r_1714').lower_bound = -glucose_uptake_max
+    model.reactions.get_by_id('r_1714').upper_bound = -glucose_uptake_min
 
     # ATP maintenance:
-    # r_4046
+    atp_main_fact = 0.7
+
+    model.reactions.get_by_id('r_4046').lower_bound = \
+        atp_main_fact * glucose_uptake_min
+    model.reactions.get_by_id('r_4046').upper_bound = \
+        atp_main_fact * glucose_uptake_max
+
+    # Ergothioneine:
+    ergoth_mass = 229.3
+    ergoth_prod_min = (0.598 - 0.018) / ergoth_mass / duration * 1000
+    ergoth_prod_max = (0.598 + 0.18) / ergoth_mass / duration * 1000
+    model.reactions.get_by_id('ergothioneine_sink').lower_bound = \
+        ergoth_prod_min
+    model.reactions.get_by_id('ergothioneine_sink').upper_bound = \
+        ergoth_prod_max
 
     # L-histidine transport:
-    model.reactions.get_by_id('r_1893').lower_bound = -1
+    # model.reactions.get_by_id('r_1893').lower_bound = -1
 
     # L-cysteine transport:
-    model.reactions.get_by_id('r_1883').lower_bound = -1
+    # model.reactions.get_by_id('r_1883').lower_bound = -1

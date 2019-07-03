@@ -24,8 +24,8 @@ def simulate(model, out_dir):
     biomass_max = _simulate(model).objective_value
     biomass_react = model.reactions.get_by_id('r_2111')
 
-    # Biomass, ergothioneine, L-histidine, L-cysteine:
-    react_ids = ['r_2111', 'ergothioneine_sink', 'r_1201', 'r_1192']
+    # Biomass, ergothioneine, glucose, L-histidine, L-cysteine:
+    react_ids = ['r_2111', 'ergothioneine_sink', 'r_1714', 'r_1201', 'r_1192']
 
     react_names = [model.reactions.get_by_id(react_id).name
                    for react_id in react_ids]
@@ -53,7 +53,8 @@ def simulate(model, out_dir):
     react_flux_df = pd.DataFrame(react_fluxes,
                                  columns=[index_name] + react_names)
 
-    react_flux_df.where(react_flux_df.abs() > 1e-12, 0, inplace=True)
+    # react_flux_df = react_flux_df.abs()
+    react_flux_df.where(react_flux_df > 1e-12, 0, inplace=True)
     react_flux_df.set_index(index_name, inplace=True)
     react_flux_df.name = 'react_fluxes'
 
@@ -86,7 +87,7 @@ def main(args):
     # Save and plot:
     react_flux_df.to_csv(os.path.join(args[1], '%s.csv' % react_flux_df.name))
 
-    plot(react_flux_df, 'flux',
+    plot(react_flux_df, 'flux / mmol h-1',
          os.path.join(args[1], '%s.png' % react_flux_df.name))
 
 
