@@ -5,14 +5,17 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=wrong-import-order
 import os.path
 import sys
 
 from cobra.io import read_sbml_model, write_sbml_model
 
 from liv.ergothioneine.build import build
+from liv.model.plot import plot
 from liv.model.utils import add_creator, get_flux_df, makedirs
 import numpy as np
+import pandas as pd
 
 
 def simulate(model, out_dir):
@@ -22,7 +25,12 @@ def simulate(model, out_dir):
     biomass_react = model.reactions.get_by_id('r_2111')
 
     # Biomass, ergothioneine, L-histidine, L-cysteine:
-    reacts = ['r_2111', 'ergothioneine_sink', 'r_1893', 'r_1883']
+    react_ids = ['r_2111', 'ergothioneine_sink', 'r_1201', 'r_1192']
+
+    react_names = [model.reactions.get_by_id(react_id).name
+                   for react_id in react_ids]
+
+    react_fluxes = []
 
     for prop in np.arange(1.0, -0.1, -0.1):
         biomass_flux = biomass_max * prop
@@ -31,14 +39,26 @@ def simulate(model, out_dir):
 
         model.objective = 'ergothioneine_sink'
         solution = _simulate(model)
-        print('%.1f' % prop, ['%.3f' % val
-                              for val in solution.fluxes[reacts].values])
+
+        react_fluxes.append([prop] + solution.fluxes[react_ids].tolist())
 
         # Format and save flux solution:
-        filename = os.path.join(out_dir, '%.1f.csv' % prop)
-        df = get_flux_df(model, solution)
+        filename = os.path.join(out_dir, '%.1f_biomass_fluxes.csv' % prop)
+        flux_df = get_flux_df(model, solution)
         makedirs(filename)
-        df.to_csv(filename)
+        flux_df.to_csv(filename)
+
+    # Save reaction fluxes:
+    index_name = 'Max biomass proportion'
+    react_flux_df = pd.DataFrame(react_fluxes,
+                                 columns=[index_name] + react_names)
+
+    react_flux_df.set_index(index_name, inplace=True)
+    react_flux_df = react_flux_df.abs()
+    react_flux_df = react_flux_df.where(react_flux_df > 1e-12).fillna(0)
+    react_flux_df.name = 'react_fluxes'
+
+    return react_flux_df
 
 
 def _simulate(model):
@@ -61,7 +81,13 @@ def main(args):
     write_sbml_model(model, args[1])
 
     # Simulate updated model:
-    simulate(model, args[2])
+    react_flux_df = simulate(model, args[2])
+
+    # Save and plot:
+    react_flux_df.to_csv(os.path.join(args[2], '%s.csv' % react_flux_df.name))
+
+    plot(react_flux_df, 'flux',
+         os.path.join(args[2], '%s.png' % react_flux_df.name))
 
 
 if __name__ == '__main__':

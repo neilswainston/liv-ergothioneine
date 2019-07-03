@@ -5,6 +5,9 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
+# pylint: disable=protected-access
+# pylint: disable=too-many-arguments
 from functools import partial
 import os.path
 
