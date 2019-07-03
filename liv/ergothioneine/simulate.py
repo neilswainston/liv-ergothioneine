@@ -13,7 +13,7 @@ from cobra.io import read_sbml_model, write_sbml_model
 
 from liv.ergothioneine.build import build
 from liv.model.plot import plot
-from liv.model.utils import add_creator, get_flux_df, makedirs
+from liv.model.utils import add_creator, get_flux_df, makedirs, to_df
 import numpy as np
 import pandas as pd
 
@@ -77,16 +77,17 @@ def main(args):
 
     # Write updated model:
     makedirs(args[1])
-    write_sbml_model(model, args[1])
+    write_sbml_model(model, os.path.join(args[1], '%s.xml' % args[2]))
+    to_df(model).to_csv(os.path.join(args[1], '%s.csv' % args[2]))
 
     # Simulate updated model:
-    react_flux_df = simulate(model, args[2])
+    react_flux_df = simulate(model, args[1])
 
     # Save and plot:
-    react_flux_df.to_csv(os.path.join(args[2], '%s.csv' % react_flux_df.name))
+    react_flux_df.to_csv(os.path.join(args[1], '%s.csv' % react_flux_df.name))
 
     plot(react_flux_df, 'flux',
-         os.path.join(args[2], '%s.png' % react_flux_df.name))
+         os.path.join(args[1], '%s.png' % react_flux_df.name))
 
 
 if __name__ == '__main__':

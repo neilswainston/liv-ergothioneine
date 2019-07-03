@@ -16,6 +16,17 @@ from cobra import Metabolite, Reaction
 import pandas as pd
 
 
+def to_df(model):
+    '''Convert model to DataFrame.'''
+    data = [[react.id, react.name, react.lower_bound, react.upper_bound,
+             react.build_reaction_string(use_metabolite_names=True)]
+            for react in model.reactions]
+
+    return pd.DataFrame(data, columns=['id', 'name',
+                                       'lower_bound', 'upper_bound',
+                                       'def']).set_index('id')
+
+
 def add_creator(model, family_name, given_name, organisation, email):
     '''Add creator.'''
     model._sbml['creators'] = [{'familyName': family_name,

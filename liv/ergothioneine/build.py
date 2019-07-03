@@ -71,10 +71,11 @@ def _add_pathway(model):
 def _add_transport(model):
     '''Add transport bounds.'''
 
+    # ATP maintenance:
+    # r_4046
+
     # L-histidine transport:
     model.reactions.get_by_id('r_1893').lower_bound = -1
-    model.reactions.get_by_id('r_1201').lower_bound = 0
 
     # L-cysteine transport:
     model.reactions.get_by_id('r_1883').lower_bound = -1
-    model.reactions.get_by_id('r_1192').lower_bound = 0
