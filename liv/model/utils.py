@@ -13,7 +13,9 @@ import os.path
 
 from cobra import Metabolite, Reaction
 
+import numpy as np
 import pandas as pd
+from synbiochem.utils.chem_utils import get_molecular_mass
 
 
 def to_df(model):
@@ -89,6 +91,36 @@ def makedirs(filename):
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
+
+
+def get_mw(model, met_id, parent_reacts=None):
+    '''Get molecular weight.'''
+    if parent_reacts is None:
+        parent_reacts = []
+
+    met = model.metabolites.get_by_id(met_id)
+
+    if met.formula:
+        return get_molecular_mass(met.formula, r_mass=2 ** 16)
+
+    for react in met.reactions:
+        if len(react.metabolites) > 1 and react not in parent_reacts:
+            mw = 0
+
+            for react_met, coeff in react.metabolites.items():
+                if react_met.id != met.id:
+                    parent_reacts.append(react)
+                    mw += get_mw(model, react_met.id, parent_reacts) * coeff
+
+                    if np.isnan(mw):
+                        break
+
+            if not np.isnan(mw):
+                print('Found:', met.name, mw, react.name)
+                return mw
+
+    print('Unfound:', met.name)
+    return float('NaN')
 
 
 def _get_react_details(model, row):

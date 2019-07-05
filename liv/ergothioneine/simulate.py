@@ -13,7 +13,7 @@ from cobra.io import read_sbml_model, write_sbml_model
 
 from liv.ergothioneine.build import build
 from liv.model.plot import plot
-from liv.model.utils import add_creator, get_flux_df, makedirs, to_df
+from liv.model.utils import add_creator, get_flux_df, get_mw, makedirs, to_df
 import numpy as np
 import pandas as pd
 
@@ -71,6 +71,9 @@ def _simulate(model):
 def main(args):
     '''main method.'''
     model = read_sbml_model(args[0])
+
+    # Get biomass MW:
+    print(get_mw(model, 's_0450__91__c__93__'))
 
     # Create updated model:
     build(model)
