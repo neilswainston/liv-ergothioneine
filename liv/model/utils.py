@@ -99,6 +99,7 @@ def get_mw(model, met_id, parent_reacts=None):
         parent_reacts = []
 
     met = model.metabolites.get_by_id(met_id)
+    target_coeff = float('NaN')
 
     if met.formula:
         return get_molecular_mass(met.formula, r_mass=2 ** 16)
@@ -114,10 +115,12 @@ def get_mw(model, met_id, parent_reacts=None):
 
                     if np.isnan(mw):
                         break
+                else:
+                    target_coeff = -coeff
 
             if not np.isnan(mw):
                 print('Found:', met.name, mw, react.name)
-                return mw
+                return mw * target_coeff
 
     print('Unfound:', met.name)
     return float('NaN')
