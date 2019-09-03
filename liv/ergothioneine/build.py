@@ -91,7 +91,7 @@ def _add_transport(model):
     # Ergothioneine:
     ergoth_mass = 229.3
     ergoth_prod_min = (0.598 - 0.018) / ergoth_mass / duration * 1000
-    ergoth_prod_max = (0.598 + 0.18) / ergoth_mass / duration * 1000
+    ergoth_prod_max = (0.598 + 0.018) / ergoth_mass / duration * 1000
     model.reactions.get_by_id('ergothioneine_sink').lower_bound = \
         ergoth_prod_min
     model.reactions.get_by_id('ergothioneine_sink').upper_bound = \
