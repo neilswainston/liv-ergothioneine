@@ -11,8 +11,9 @@ import random
 import unittest
 
 from cobra.io import read_sbml_model
-from liv.model.utils import get_mw
 from synbiochem.utils.chem_utils import get_molecular_mass
+
+from liv.model.utils import get_mw
 
 
 class Test(unittest.TestCase):

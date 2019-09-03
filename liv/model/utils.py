@@ -8,14 +8,15 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments
+# pylint: disable=wrong-import-order
 from functools import partial
 import os.path
 
 from cobra import Metabolite, Reaction
+from synbiochem.utils.chem_utils import get_molecular_mass
 
 import numpy as np
 import pandas as pd
-from synbiochem.utils.chem_utils import get_molecular_mass
 
 
 def to_df(model):
