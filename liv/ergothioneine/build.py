@@ -5,7 +5,11 @@ All rights reserved.
 
 @author: neilswainston
 '''
-from liv.model.utils import add_met, add_reaction
+import os
+import sys
+from cobra.io import read_sbml_model, write_sbml_model
+
+from liv.model.utils import add_creator, add_met, add_reaction, makedirs
 
 
 def build(model):
@@ -102,3 +106,20 @@ def _add_transport(model):
 
     # L-cysteine transport:
     # model.reactions.get_by_id('r_1883').lower_bound = -1
+
+
+def main(args):
+    '''main method.'''
+    model = read_sbml_model(args[0])
+
+    # Create updated model:
+    build(model)
+    add_creator(model, *args[3:7])
+
+    # Write updated model:
+    makedirs(args[1])
+    write_sbml_model(model, os.path.join(args[1], '%s.xml' % args[2]))
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
