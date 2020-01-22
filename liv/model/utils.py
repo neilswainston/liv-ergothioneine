@@ -88,7 +88,7 @@ def get_flux_df(model, solution):
 
 def makedirs(filename):
     '''Make directories.'''
-    dir_name = os.path.dirname(filename)
+    dir_name = os.path.dirname(os.path.abspath(filename))
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
